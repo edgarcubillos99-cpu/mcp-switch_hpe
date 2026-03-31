@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: noc-mcp-server
+    restart: unless-stopped
+    ports:
+      # Mapea el puerto de la máquina host al del contenedor
+      - "${PORT:-8080}:8080"
+    env_file:
+      - .env
+    volumes:
+      # Monta el archivo de comandos dinámicos como 'read-only' (ro)
+      # Si modificas commands.yaml en tu host, el contenedor verá los cambios
+      - ./commands.yaml:/app/commands.yaml:ro
+    environment:
+      - TZ=${TZ:-UTC}
+      - PORT=${PORT}
+      - MCP_API_KEY=${MCP_API_KEY
+    # Opcional: Configuración de límites para proteger el servidor host
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+    # Configuración de logs rotativos para evitar que el disco se llene
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

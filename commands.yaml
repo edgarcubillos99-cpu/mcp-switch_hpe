@@ -1,0 +1,9 @@
+server:
+  port: 8080
+  api_key: "super-secret-noc-key"
+
+commands:
+  show_interfaces: "show interfaces"
+  show_vlan: "show vlan"
+  show_mac: "show mac-address"
+  show_lldp: "show lldp neighbors"
