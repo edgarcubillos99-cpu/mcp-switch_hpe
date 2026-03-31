@@ -19,7 +19,7 @@ services:
     environment:
       - TZ=${TZ:-UTC}
       - PORT=${PORT}
-      - MCP_API_KEY=${MCP_API_KEY
+      - MCP_API_KEY=${MCP_API_KEY}
     # Opcional: Configuración de límites para proteger el servidor host
     deploy:
       resources:

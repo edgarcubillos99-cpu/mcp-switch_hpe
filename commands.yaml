@@ -3,7 +3,30 @@ server:
   api_key: "super-secret-noc-key"
 
 commands:
-  show_interfaces: "show interfaces"
-  show_vlan: "show vlan"
-  show_mac: "show mac-address"
-  show_lldp: "show lldp neighbors"
+  # Comandos Globales / Estáticos
+  display_current_config: "display current-configuration"
+  display_version: "display version"
+  display_device: "display device"
+  display_cpu: "display cpu-usage"
+  display_memory: "display memory"
+  display_clock: "display clock"
+  display_interfaces_brief: "display interface brief"
+  display_lldp_neighbors: "display lldp neighbor-information list"
+  display_ip_int_brief: "display ip interface brief"
+  display_vlan_all: "display vlan all"
+  display_routing_table: "display ip routing-table"
+  display_arp: "display arp"
+  display_ospf_peer: "display ospf peer"
+  display_vsi: "display vsi"
+  display_ospf_peer_verbose: "display ospf peer verbose"
+
+  # Comandos Dinámicos (Parametrizados)
+  # El agente IA debe enviar el parámetro 'interface', ej: 'Ten-GigabitEthernet 1/0/25' o 'Ten-GigabitEthernet1/0/25'
+  display_interface: "display interface {{interface}}"
+  display_lldp_interface: "display lldp neighbor-information interface {{interface}}"
+  display_transceiver: "display transceiver diagnosis interface {{interface}}"
+  display_mac_interface: "display mac-address interface {{interface}}"
+  
+  # El agente IA debe enviar el parámetro 'vlan' o 'vsi_name'
+  display_mac_vsi_vlan: "display mac-address vsi {{vlan}}"
+  display_vsi_verbose: "display vsi {{vsi_name}} verbose"

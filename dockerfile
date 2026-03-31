@@ -1,7 +1,7 @@
 # ==========================================
 # Etapa 1: Compilación (Builder)
 # ==========================================
-FROM golang:1.22-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 # Instalar git por si hay dependencias privadas
 RUN apk update && apk add --no-cache git

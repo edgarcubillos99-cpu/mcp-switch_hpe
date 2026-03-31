@@ -12,7 +12,7 @@ import (
 
 func main() {
 	// 1. Cargar configuración y comandos dinámicos
-	cfg, err := config.LoadConfig("../../commands.yaml")
+	cfg, err := config.LoadConfig("commands.yaml")
 	if err != nil {
 		log.Fatalf("Error cargando configuración: %v", err)
 	}
