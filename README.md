@@ -38,9 +38,9 @@ El sistema permite a la IA ejecutar comandos de diagnóstico (`display`) en los 
 
 ---
 
-# ⚙️ Configuración y Despliegueç
+# ⚙️ Configuración y Despliegue
 
-###1. Variables de Entorno
+### 1. Variables de Entorno
 
 Copia el archivo de plantilla para crear tu configuración local
 
