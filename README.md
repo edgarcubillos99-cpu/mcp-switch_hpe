@@ -3,13 +3,21 @@
 Este proyecto es un servidor **MCP (Model Context Protocol)** desarrollado en **Golang**. Actúa como un puente seguro entre un Agente de Inteligencia Artificial (IA) y los equipos de red del NOC (Network Operations Center), específicamente switches HPE Comware y Allied Telesis.
 
 ✅ Implementación nativa del Model Context Protocol (MCP) vía HTTP REST
+
 ✅ Endpoint de "Descubrimiento" para auto-documentación de herramientas en el LLM
+
 ✅ Conexión Telnet resiliente con captura dinámica de prompts de consola
+
 ✅ Evasión automatizada de paginación (--More--) en equipos HPE/Comware
+
 ✅ Inyección dinámica de variables (interfaces, VLANs) mediante plantillas YAML
+
 ✅ Seguridad Zero-Knowledge: La IA nunca conoce las contraseñas de los switches
+
 ✅ Validación estricta mediante API Keys
+
 ✅ Despliegue ultraligero con Docker Multi-stage (Go + Alpine)
+
 ✅ Integración probada con n8n (Advanced AI Agents)
 
 El sistema permite a la IA ejecutar comandos de diagnóstico (`display`) en los switches, capturando la salida y devolviéndola en formato JSON para su análisis, todo ello manejando automáticamente las complejidades de la interacción por consola.
