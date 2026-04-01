@@ -103,7 +103,7 @@ PORT=8080
 
 TZ=America/Bogota
 
-MCP_BASE_URL=URL_IMPORTANTE_PARA_CONECTARCE
+MCP_BASE_URL=URL_IMPORTANTE_PARA_CONECTARSE
 
 --------------------------------------------------------
 ### 🟢 SEGURIDAD DE LA API (MCP)
