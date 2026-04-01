@@ -51,8 +51,17 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			realCommand = strings.ReplaceAll(realCommand, placeholder, val)
 		}
 	}
+	user := req.SwitchUser
+	if user == "" {
+		user = h.Config.DefaultSwitchUser
+	}
+	pass := req.SwitchPass
+	if pass == "" {
+		pass = h.Config.DefaultSwitchPassword
+	}
+
 	// 3. Ejecutar el comando vía Telnet en el switch
-	output, err := telnet.ExecuteCommand(req.SwitchIP, req.SwitchUser, req.SwitchPass, realCommand)
+	output, err := telnet.ExecuteCommand(req.SwitchIP, user, pass, realCommand)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

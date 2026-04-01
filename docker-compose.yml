@@ -20,6 +20,8 @@ services:
       - TZ=${TZ:-UTC}
       - PORT=${PORT}
       - MCP_API_KEY=${MCP_API_KEY}
+      - NOC_SWITCH_USER=${NOC_SWITCH_USER:-allied}
+      - NOC_SWITCH_PASSWORD=${NOC_SWITCH_PASSWORD:-4ll13d}
     # Opcional: Configuración de límites para proteger el servidor host
     deploy:
       resources:
