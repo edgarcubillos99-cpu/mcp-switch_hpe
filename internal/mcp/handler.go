@@ -1,92 +1,70 @@
 package mcp
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"net/http"
+	"os"
+	"strings"
+
+	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 	"noc-mcp/internal/config"
 	"noc-mcp/internal/telnet"
-	"strings"
 )
 
-// ToolRequest representa la petición que enviaría el Agente IA
-type ToolRequest struct {
-	ToolName   string            `json:"tool_name"`
-	SwitchIP   string            `json:"switch_ip"`
-	SwitchUser string            `json:"switch_user"`
-	SwitchPass string            `json:"switch_pass"`
-	Arguments  map[string]string `json:"arguments"` // Recibir variables dinámicas de la IA
-}
-
-type Handler struct {
-	Config *config.Config
-}
-
-// Endpoint de Descubrimiento de Herramientas
-func (h *Handler) ListTools(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	// Devolvemos el mapa completo de comandos (sus descripciones y reglas)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"tools_available": len(h.Config.Commands),
-		"catalog":         h.Config.Commands,
-	})
-}
-
-// ServeHTTP maneja la ejecución de las herramientas (Tools) del MCP (POST)
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var req ToolRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	// 1. Validar que el comando (Tool) exista en la configuración dinámica
-	cmdDef, exists := h.Config.Commands[req.ToolName]
-	if !exists {
-		http.Error(w, fmt.Sprintf("Tool %s no está registrada", req.ToolName), http.StatusBadRequest)
-		return
-	}
-	realCommand := cmdDef.Command
-
-	// 2. Reemplazar variables dinámicas en el comando
-	// Si la IA envía {"interface": "Ten-GigabitEthernet 1/0/25"}
-	// convierte "display interface {{interface}}" en "display interface Ten-GigabitEthernet 1/0/25"
-	if req.Arguments != nil {
-		for key, val := range req.Arguments {
-			placeholder := fmt.Sprintf("{{%s}}", key)
-			realCommand = strings.ReplaceAll(realCommand, placeholder, val)
+// CreateToolHandler devuelve una función compatible con el SDK de mcp-go
+func CreateToolHandler(cmdDef config.CommandDef) server.ToolHandlerFunc {
+	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		// MCP entrega Arguments como any (JSON object); hay que asertar a mapa.
+		argsRaw := request.Params.Arguments
+		args, ok := argsRaw.(map[string]any)
+		if !ok {
+			if argsRaw == nil {
+				args = map[string]any{}
+			} else {
+				return mcp.NewToolResultError("Los argumentos deben ser un objeto JSON (mapa de claves a valores)."), nil
+			}
 		}
-	}
-	user := req.SwitchUser
-	if user == "" {
-		user = h.Config.DefaultSwitchUser
-	}
-	pass := req.SwitchPass
-	if pass == "" {
-		pass = h.Config.DefaultSwitchPassword
-	}
 
-	// 3. Ejecutar el comando vía Telnet en el switch
-	output, err := telnet.ExecuteCommand(req.SwitchIP, user, pass, realCommand)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+		// 1. Extraer la IP del switch (que ahora será un argumento nativo)
+		ipRaw, ok := args["switch_ip"].(string)
+		if !ok || ipRaw == "" {
+			return mcp.NewToolResultError("El parámetro 'switch_ip' es obligatorio."), nil
+		}
 
-	// 4. Devolver el resultado al Agente IA
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
-		"status": "success",
-		"output": output,
-	})
+		realCommand := cmdDef.Command
+
+		// 2. Reemplazar dinámicamente cualquier otra variable (como {{interface}})
+		for key, valRaw := range args {
+			if key == "switch_ip" {
+				continue
+			}
+			if val, ok := valRaw.(string); ok {
+				placeholder := fmt.Sprintf("{{%s}}", key)
+				realCommand = strings.ReplaceAll(realCommand, placeholder, val)
+			}
+		}
+
+		// Validar que no haya quedado ninguna variable sin reemplazar
+		if strings.Contains(realCommand, "{{") {
+			return mcp.NewToolResultError(fmt.Sprintf("Faltan argumentos para completar el comando: %s", realCommand)), nil
+		}
+
+		// 3. Obtener credenciales seguras del entorno (Zero-Knowledge)
+		user := os.Getenv("NOC_SWITCH_USER")
+		pass := os.Getenv("NOC_SWITCH_PASSWORD")
+
+		if user == "" || pass == "" {
+			return mcp.NewToolResultError("Error crítico: Las credenciales NOC_SWITCH_USER o NOC_SWITCH_PASSWORD no están en el entorno."), nil
+		}
+
+		// 4. Ejecutar el comando en el switch
+		output, err := telnet.ExecuteCommand(ipRaw, user, pass, realCommand)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Error de red conectando al switch: %v", err)), nil
+		}
+
+		// 5. Devolver el texto limpio al LLM
+		return mcp.NewToolResultText(output), nil
+	}
 }
