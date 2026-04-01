@@ -137,54 +137,52 @@ Configura un nodo HTTP Request que se ejecute antes del Agente.
 Conecta un nodo de Herramienta (HTTP Request Tool) al Agente.
 
     Método: POST
-
+    
     URL: http://<APP_BASE_URL>:8080/mcp/v1/tools/execute
-
+    
     Body: La IA debe generar dinámicamente el tool_name, switch_ip y arguments basados en el catálogo descubierto.
-
+    
     Description:
+    Ejecuta comandos de diagnóstico en switches HPE/Comware del NOC. 
+    PARÁMETROS OBLIGATORIOS a generar en tu respuesta JSON:
+    
+    1. 'switch_ip': La dirección IP del equipo a diagnosticar (ej. 10.254.254.57).
+    2. 'tool_name': El comando exacto a ejecutar. DEBES elegir EXACTAMENTE uno de la siguiente lista. PROHIBIDO usar espacios, respeta los guiones bajos.
+    3. 'arguments': Un objeto JSON. Su contenido depende del 'tool_name' elegido.
+    
+    --- COMANDOS ESTÁTICOS ---
+    (Para estos, envía SIEMPRE un objeto vacío en los argumentos: "arguments": {})
+    - 'display_version' : Ver versión, modelo, firmware y uptime.
+    - 'display_current_config' : Ver la configuración completa.
+    - 'display_device' : Ver estado del hardware.
+    - 'display_cpu' : Ver uso general de procesador.
+    - 'display_memory' : Ver uso de memoria RAM.
+    - 'display_clock' : Ver hora y fecha configurada.
+    - 'display_interfaces_brief' : Resumen rápido del estado de todos los puertos.
+    - 'display_ip_int_brief' : Resumen de interfaces con configuración IP.
+    - 'display_vlan_all' : Mostrar todas las VLANs configuradas.
+    - 'display_routing_table' : Ver la tabla de enrutamiento IP.
+    - 'display_arp' : Ver la tabla ARP (relación IP/MAC).
+    - 'display_lldp_neighbors' : Ver resumen de todos los equipos vecinos conectados.
+    - 'display_ospf_peer' : Ver resumen de vecinos OSPF.
+    - 'display_ospf_peer_verbose' : Ver detalles profundos de vecinos OSPF.
+    - 'display_vsi' : Listar todas las Virtual Switch Instances.
+    
+    --- COMANDOS DINÁMICOS ---
+    (Para estos, "arguments" DEBE ser un objeto JSON con la clave indicada)
+    
+    * Requieren la clave "interface" (Ejemplo: "arguments": { "interface": "Ten-GigabitEthernet1/0/25" }):
+    - 'display_interface' : Ver estado detallado, tráfico y errores de un puerto específico.
+    - 'display_lldp_interface' : Ver qué equipo está conectado a un puerto específico.
+    - 'display_transceiver' : Ver niveles ópticos (luz) del transceptor (SFP) de un puerto específico.
+    - 'display_mac_interface' : Ver qué direcciones MAC se aprenden en un puerto específico.
+    
+    * Requieren otras claves:
+    - 'display_mac_vsi_vlan' : Ver tabla MAC de una VLAN específica. (Ejemplo: "arguments": { "vlan": "800" })
+    - 'display_vsi_verbose' : Ver detalles completos de una VSI. (Ejemplo: "arguments": { "vsi_name": "vlan2219" })
+    
+    REGLA FINAL: Nunca inventes tool_names. Limítate a usar los de esta lista.
 
-```plaintext
-Ejecuta comandos de diagnóstico en switches HPE/Comware del NOC. 
-PARÁMETROS OBLIGATORIOS a generar en tu respuesta JSON:
-
-1. 'switch_ip': La dirección IP del equipo a diagnosticar (ej. 10.254.254.57).
-2. 'tool_name': El comando exacto a ejecutar. DEBES elegir EXACTAMENTE uno de la siguiente lista. PROHIBIDO usar espacios, respeta los guiones bajos.
-3. 'arguments': Un objeto JSON. Su contenido depende del 'tool_name' elegido.
-
---- COMANDOS ESTÁTICOS ---
-(Para estos, envía SIEMPRE un objeto vacío en los argumentos: "arguments": {})
-- 'display_version' : Ver versión, modelo, firmware y uptime.
-- 'display_current_config' : Ver la configuración completa.
-- 'display_device' : Ver estado del hardware.
-- 'display_cpu' : Ver uso general de procesador.
-- 'display_memory' : Ver uso de memoria RAM.
-- 'display_clock' : Ver hora y fecha configurada.
-- 'display_interfaces_brief' : Resumen rápido del estado de todos los puertos.
-- 'display_ip_int_brief' : Resumen de interfaces con configuración IP.
-- 'display_vlan_all' : Mostrar todas las VLANs configuradas.
-- 'display_routing_table' : Ver la tabla de enrutamiento IP.
-- 'display_arp' : Ver la tabla ARP (relación IP/MAC).
-- 'display_lldp_neighbors' : Ver resumen de todos los equipos vecinos conectados.
-- 'display_ospf_peer' : Ver resumen de vecinos OSPF.
-- 'display_ospf_peer_verbose' : Ver detalles profundos de vecinos OSPF.
-- 'display_vsi' : Listar todas las Virtual Switch Instances.
-
---- COMANDOS DINÁMICOS ---
-(Para estos, "arguments" DEBE ser un objeto JSON con la clave indicada)
-
-* Requieren la clave "interface" (Ejemplo: "arguments": { "interface": "Ten-GigabitEthernet1/0/25" }):
-- 'display_interface' : Ver estado detallado, tráfico y errores de un puerto específico.
-- 'display_lldp_interface' : Ver qué equipo está conectado a un puerto específico.
-- 'display_transceiver' : Ver niveles ópticos (luz) del transceptor (SFP) de un puerto específico.
-- 'display_mac_interface' : Ver qué direcciones MAC se aprenden en un puerto específico.
-
-* Requieren otras claves:
-- 'display_mac_vsi_vlan' : Ver tabla MAC de una VLAN específica. (Ejemplo: "arguments": { "vlan": "800" })
-- 'display_vsi_verbose' : Ver detalles completos de una VSI. (Ejemplo: "arguments": { "vsi_name": "vlan2219" })
-
-REGLA FINAL: Nunca inventes tool_names. Limítate a usar los de esta lista.
-```
 
 ---
 
