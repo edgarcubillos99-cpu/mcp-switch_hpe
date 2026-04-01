@@ -22,7 +22,22 @@ type Handler struct {
 	Config *config.Config
 }
 
-// ServeHTTP maneja la ejecución de las herramientas (Tools) del MCP
+// Endpoint de Descubrimiento de Herramientas
+func (h *Handler) ListTools(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	// Devolvemos el mapa completo de comandos (sus descripciones y reglas)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"tools_available": len(h.Config.Commands),
+		"catalog":         h.Config.Commands,
+	})
+}
+
+// ServeHTTP maneja la ejecución de las herramientas (Tools) del MCP (POST)
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -36,11 +51,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 1. Validar que el comando (Tool) exista en la configuración dinámica
-	realCommand, exists := h.Config.Commands[req.ToolName]
+	cmdDef, exists := h.Config.Commands[req.ToolName]
 	if !exists {
 		http.Error(w, fmt.Sprintf("Tool %s no está registrada", req.ToolName), http.StatusBadRequest)
 		return
 	}
+	realCommand := cmdDef.Command
 
 	// 2. Reemplazar variables dinámicas en el comando
 	// Si la IA envía {"interface": "Ten-GigabitEthernet 1/0/25"}

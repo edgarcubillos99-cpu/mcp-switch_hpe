@@ -3,30 +3,119 @@ server:
   api_key: "super-secret-noc-key"
 
 commands:
-  # Comandos Globales / Estáticos
-  display_current_config: "display current-configuration"
-  display_version: "display version"
-  display_device: "display device"
-  display_cpu: "display cpu-usage"
-  display_memory: "display memory"
-  display_clock: "display clock"
-  display_interfaces_brief: "display interface brief"
-  display_lldp_neighbors: "display lldp neighbor-information list"
-  display_ip_int_brief: "display ip interface brief"
-  display_vlan_all: "display vlan all"
-  display_routing_table: "display ip routing-table"
-  display_arp: "display arp"
-  display_ospf_peer: "display ospf peer"
-  display_vsi: "display vsi"
-  display_ospf_peer_verbose: "display ospf peer verbose"
+  # ==========================================
+  # COMANDOS ESTÁTICOS (Sin argumentos)
+  # ==========================================
+  display_version:
+    command: "display version"
+    description: "Muestra la versión de firmware, el modelo exacto de hardware y el tiempo de encendido (uptime) del switch."
+    requires_arguments: false
 
-  # Comandos Dinámicos (Parametrizados)
-  # El agente IA debe enviar el parámetro 'interface', ej: 'Ten-GigabitEthernet 1/0/25' o 'Ten-GigabitEthernet1/0/25'
-  display_interface: "display interface {{interface}}"
-  display_lldp_interface: "display lldp neighbor-information interface {{interface}}"
-  display_transceiver: "display transceiver diagnosis interface {{interface}}"
-  display_mac_interface: "display mac-address interface {{interface}}"
-  
-  # El agente IA debe enviar el parámetro 'vlan' o 'vsi_name'
-  display_mac_vsi_vlan: "display mac-address vsi {{vlan}}"
-  display_vsi_verbose: "display vsi {{vsi_name}} verbose"
+  display_current_config:
+    command: "display current-configuration"
+    description: "Muestra la configuración completa (running-config) del equipo. Útil para auditorías generales."
+    requires_arguments: false
+
+  display_device:
+    command: "display device"
+    description: "Muestra el estado del hardware físico, incluyendo tarjetas, ventiladores y fuentes de poder."
+    requires_arguments: false
+
+  display_cpu:
+    command: "display cpu-usage"
+    description: "Muestra el porcentaje de uso general del procesador (CPU) del equipo."
+    requires_arguments: false
+
+  display_memory:
+    command: "display memory"
+    description: "Muestra el porcentaje de uso de la memoria RAM del equipo."
+    requires_arguments: false
+
+  display_clock:
+    command: "display clock"
+    description: "Muestra la hora, fecha y zona horaria configurada actualmente en el switch."
+    requires_arguments: false
+
+  display_interfaces_brief:
+    command: "display interface brief"
+    description: "Muestra un resumen rápido en formato de tabla del estado (UP/DOWN) de todos los puertos físicos."
+    requires_arguments: false
+
+  display_lldp_neighbors:
+    command: "display lldp neighbor-information list"
+    description: "Muestra un resumen de todos los equipos vecinos conectados directamente descubiertos por LLDP."
+    requires_arguments: false
+
+  display_ip_int_brief:
+    command: "display ip interface brief"
+    description: "Muestra un resumen exclusivo de las interfaces que tienen direcciones IP configuradas y su estado."
+    requires_arguments: false
+
+  display_vlan_all:
+    command: "display vlan all"
+    description: "Muestra una lista de todas las VLANs configuradas en el switch y los puertos asignados a ellas."
+    requires_arguments: false
+
+  display_routing_table:
+    command: "display ip routing-table"
+    description: "Muestra la tabla de enrutamiento IP completa del equipo."
+    requires_arguments: false
+
+  display_arp:
+    command: "display arp"
+    description: "Muestra la tabla ARP, que relaciona las direcciones IP con las direcciones MAC conocidas por el switch."
+    requires_arguments: false
+
+  display_ospf_peer:
+    command: "display ospf peer"
+    description: "Muestra un resumen rápido de los vecinos OSPF y su estado de adyacencia."
+    requires_arguments: false
+
+  display_vsi:
+    command: "display vsi"
+    description: "Lista todas las Virtual Switch Instances (VSI) configuradas para servicios VPLS/L2VPN."
+    requires_arguments: false
+
+  display_ospf_peer_verbose:
+    command: "display ospf peer verbose"
+    description: "Muestra detalles profundos y extendidos de los vecinos OSPF."
+    requires_arguments: false
+
+  # ==========================================
+  # COMANDOS DINÁMICOS (Requieren argumentos)
+  # ==========================================
+  display_interface:
+    command: "display interface {{interface}}"
+    description: "Muestra el estado detallado, estadísticas de tráfico y contadores de errores de un puerto específico."
+    requires_arguments: true
+    argument_hint: "Requiere la clave 'interface' en los argumentos. Ejemplo: {'interface': 'Ten-GigabitEthernet1/0/25'}"
+
+  display_lldp_interface:
+    command: "display lldp neighbor-information interface {{interface}}"
+    description: "Muestra información detallada sobre qué equipo vecino está conectado a un puerto específico vía LLDP."
+    requires_arguments: true
+    argument_hint: "Requiere la clave 'interface' en los argumentos. Ejemplo: {'interface': 'GigabitEthernet1/0/1'}"
+
+  display_transceiver:
+    command: "display transceiver diagnosis interface {{interface}}"
+    description: "Muestra los niveles ópticos (potencia de luz Tx/Rx en dBm) del transceptor SFP de un puerto de fibra."
+    requires_arguments: true
+    argument_hint: "Requiere la clave 'interface' en los argumentos."
+
+  display_mac_interface:
+    command: "display mac-address interface {{interface}}"
+    description: "Muestra qué direcciones MAC específicas se están aprendiendo a través de un puerto en particular."
+    requires_arguments: true
+    argument_hint: "Requiere la clave 'interface' en los argumentos."
+
+  display_mac_vsi_vlan:
+    command: "display mac-address vsi {{vlan}}"
+    description: "Muestra la tabla de direcciones MAC aprendidas dentro de una VLAN o VSI específica."
+    requires_arguments: true
+    argument_hint: "Requiere la clave 'vlan' en los argumentos. Ejemplo: {'vlan': '800'}"
+
+  display_vsi_verbose:
+    command: "display vsi {{vsi_name}} verbose"
+    description: "Muestra detalles completos de configuración y estado de una VSI (Virtual Switch Instance) específica."
+    requires_arguments: true
+    argument_hint: "Requiere la clave 'vsi_name' en los argumentos. Ejemplo: {'vsi_name': 'vlan0938'}"
