@@ -44,11 +44,11 @@ func applySwitchCredentialsFromEnv(cfg *Config) {
 	if u := os.Getenv("NOC_SWITCH_USER"); u != "" {
 		cfg.DefaultSwitchUser = u
 	} else {
-		cfg.DefaultSwitchUser = "allied"
+		cfg.DefaultSwitchUser = ""
 	}
 	if p := os.Getenv("NOC_SWITCH_PASSWORD"); p != "" {
 		cfg.DefaultSwitchPassword = p
 	} else {
-		cfg.DefaultSwitchPassword = "4ll13d"
+		cfg.DefaultSwitchPassword = ""
 	}
 }
